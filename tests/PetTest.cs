@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using RestSharp;
 
 namespace Pet;
@@ -15,7 +16,7 @@ public class PetTest
         var request = new RestRequest("pet", Method.Post);
 
         // save pet.json in memory
-        string jsonBody = File.ReadAllText("/Users/dierokreator/Programming/Interasys/PetStore139Sharp/fixtures/pet1.json")
+        string jsonBody = File.ReadAllText("/Users/dierokreator/Programming/Interasys/PetStore139Sharp/fixtures/pet1.json");
 
         // add file content to the request
         request.AddBody(jsonBody);
@@ -23,5 +24,17 @@ public class PetTest
         var response = client.Execute(request);
 
         var responseBody = JsonConvert.DeserializeObject<dynamic>(response.Content);
+
+        Console.WriteLine(responseBody);
+
+        Assert.That((int)response.StatusCode, Is.EqualTo(200));
+        
+        String name = responseBody.name.ToString();  
+        Assert.That(name, Is.EqualTo("Athena"));
+
+        // Assert.That(responseBody.name.ToString(), Is.EqualTo("Athena"));
+
+        string status = responseBody.status;
+        Assert.That(status, Is.EqualTo("available"));
     }
 }
