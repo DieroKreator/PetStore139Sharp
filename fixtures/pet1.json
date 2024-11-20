@@ -1,0 +1,18 @@
+{
+    "id": 602740501,
+    "category": {
+      "id": 1,
+      "name": "dog"
+    },
+    "name": "Athena",
+    "photoUrls": [
+      ""
+    ],
+    "tags": [
+      {
+        "id": 1,
+        "name": "vacinado"
+      }
+    ],
+    "status": "available"
+  }
