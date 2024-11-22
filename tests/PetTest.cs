@@ -61,4 +61,11 @@ public class PetTest
         Assert.That((String)responseBody.tags[0].name, Is.EqualTo(tagsName));
 
     }
+
+    [Test, Order(3)]
+    public void PutPetTest()
+    {
+        PetModel petModel = new PetModel();
+        petModel
+    }
 }
