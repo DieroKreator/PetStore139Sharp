@@ -1,3 +1,4 @@
+using Models;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -66,6 +67,31 @@ public class PetTest
     public void PutPetTest()
     {
         PetModel petModel = new PetModel();
-        petModel
+        petModel.id = 602740501;
+        petModel.category = new Category(1, "dog");
+        petModel.name = "Athena";
+        petModel.photoUrls = new String[] { "" };
+        petModel.tags = new Tag[] { new Tag(1, "vacinado"),
+                                    new Tag(2, "castrado")};
+        petModel.status = "pending";
+
+        // Transformar o modelo acima em um arquivo json
+        String jsonBody = JsonConvert.SerializeObject(petModel, Formatting.Indented);
+        Console.WriteLine(jsonBody);
+
+        var client = new RestClient(BASE_URL);
+        var request = new RestRequest("pet", Method.Put);
+        request.AddBody(jsonBody);
+
+        var response = client.Execute(request);
+
+        var responseBody = JsonConvert.DeserializeObject<dynamic>(response.Content);
+        Console.WriteLine(responseBody);
+
+        Assert.That((int)response.StatusCode, Is.EqualTo(200));
+        Assert.That((int)responseBody.id, Is.EqualTo(petModel.id));
+        Assert.That((String)responseBody.tags[1].name, Is.EqualTo(petModel.tags[1].name));
+        Assert.That((String)responseBody.status, Is.EqualTo(petModel.status));
+
     }
 }
