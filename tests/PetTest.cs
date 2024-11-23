@@ -9,6 +9,26 @@ public class PetTest
     // API address
     private const string BASE_URL = "https://petstore.swagger.io/v2/";
 
+    // Função de leitura de dados a partir de um arquivo csv
+    public static IEnumerable<TestCaseData> getTestData()
+    {
+        String caminhoMassa = @"fixtures/pets.csv";
+
+        using var reader = new StreamReader(caminhoMassa);
+
+        // Pula a primeira linha com os cabeçalhos
+        reader.ReadLine();
+
+        while (!reader.EndOfStream)
+        {
+            var line = reader.ReadLine();
+            var values = line.Split(",");
+
+            yield return new TestCaseData(int.Parse(values[0]), int.Parse(values[1]), values[2], values[3], values[4], values[5], values[6], values[7]);
+        }
+
+    }
+
     [Test, Order(1)]
     public void PostPetTest()
     {
@@ -119,5 +139,57 @@ public class PetTest
         Assert.That((int)responseBody.code, Is.EqualTo(200));
         Assert.That((String)responseBody.message, Is.EqualTo(petId.ToString()));
 
+    }
+
+    [TestCaseSource("getTestData", new object[]{}), Order(5)]
+    public void PostPetDDTest(int petId,
+                              int categoryId,
+                              String categoryName,
+                              String petName,
+                              String photoUrls,
+                              String tagsIds,
+                              String tagsName,
+                              String status
+                              )
+    {
+        // Configura
+        PetModel petModel = new PetModel();
+        petModel.id = petId;
+        petModel.category = new Category(categoryId, categoryName);
+        petModel.name = petName;
+        petModel.photoUrls = new String[]{photoUrls};
+
+        var client = new RestClient(BASE_URL);
+
+        var request = new RestRequest("pet", Method.Post);
+
+        // save pet.json in memory
+        string jsonBody = File.ReadAllText("/Users/dierokreator/Programming/Interasys/PetStore139Sharp/fixtures/pet1.json");
+
+        // add file content to the request
+        request.AddBody(jsonBody);
+
+        var response = client.Execute(request);
+
+        var responseBody = JsonConvert.DeserializeObject<dynamic>(response.Content);
+
+        Console.WriteLine(responseBody);
+
+        Assert.That((int)response.StatusCode, Is.EqualTo(200));
+
+        // Valida o petId
+        int petId = responseBody.id;
+        Assert.That(petId, Is.EqualTo(602740501)); 
+
+        String name = responseBody.name.ToString();
+        Assert.That(name, Is.EqualTo("Athena"));
+
+        // Assert.That(responseBody.name.ToString(), Is.EqualTo("Athena"));
+
+        String status = responseBody.status;
+        Assert.That(status, Is.EqualTo("available"));
+
+        // Armazenar os dados obtidos para usar nos próximos testes
+        Environment.SetEnvironmentVariable("petId", petId.ToString());
     }
 }
