@@ -206,4 +206,30 @@ public class PetTest
         // Valida o status do animal na resposta
         Assert.That((String)responseBody.status, Is.EqualTo(status));
     }
+
+    [Test, Order(6)]
+    public void GetUserLoginTest()
+    {
+        // Configura
+        String username = "charlie";
+        String password = "teste";
+
+        var client = new RestClient(BASE_URL);
+        var request = new RestRequest($"user/login?username={username}&password={password}", Method.Get);
+        
+        // Executa
+        var response = client.Execute(request);
+
+        // Valida
+        var responseBody = JsonConvert.DeserializeObject<dynamic>(response.Content);
+
+        Assert.That((int)response.StatusCode, Is.EqualTo(200));
+        Assert.That((int)responseBody.code, Is.EqualTo(200));
+        String message = responseBody.message;
+        String token = message.Substring(message.LastIndexOf(":")+1);
+        Console.WriteLine($"Token = {token}");
+
+        Environment.SetEnvironmentVariable("token", token);
+
+    }
 }
