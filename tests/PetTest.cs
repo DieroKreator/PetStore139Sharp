@@ -12,7 +12,7 @@ public class PetTest
     // Função de leitura de dados a partir de um arquivo csv
     public static IEnumerable<TestCaseData> getTestData()
     {
-        String caminhoMassa = @"fixtures/pets.csv";
+        String caminhoMassa = @"/Users/dierokreator/Programming/Interasys/PetStore139Sharp/fixtures/pets.csv";
 
         using var reader = new StreamReader(caminhoMassa);
 
@@ -159,14 +159,33 @@ public class PetTest
         petModel.name = petName;
         petModel.photoUrls = new String[]{photoUrls};
 
+        // Código para gerar as multiplas tags que o pet pode ter
+        String[] tagsIdsList = tagsIds.Split(";");   // Ler
+        String[] tagsNameList = tagsName.Split(";"); // Ler
+        List<Tag> tagList = new List<Tag>(); // Gravar depois do for
+
+        for (int i = 0; i < tagsIdsList.Length; i++)
+        {
+            int tagId = int.Parse(tagsIdsList[i]);
+            String tagName = tagsNameList[i];
+
+            Tag tag = new Tag(tagId, tagName);
+            tagList.Add(tag);
+        }
+
+        petModel.tags = tagList.ToArray();
+
+        petModel.status = status;
+
+        // A estrutura de dados está pronta, agora vamos serializar
+        String jsonBody = JsonConvert.SerializeObject(petModel, Formatting.Indented);
+        Console.WriteLine(jsonBody);
+
         var client = new RestClient(BASE_URL);
 
         var request = new RestRequest("pet", Method.Post);
 
-        // save pet.json in memory
-        string jsonBody = File.ReadAllText("/Users/dierokreator/Programming/Interasys/PetStore139Sharp/fixtures/pet1.json");
-
-        // add file content to the request
+        // adiciona na requisição o conteúdo do arquivo pet1.json
         request.AddBody(jsonBody);
 
         var response = client.Execute(request);
@@ -175,21 +194,16 @@ public class PetTest
 
         Console.WriteLine(responseBody);
 
+        // Valide que na resposta, o status code é igual ao resultado esperado (200)
         Assert.That((int)response.StatusCode, Is.EqualTo(200));
 
         // Valida o petId
-        int petId = responseBody.id;
-        Assert.That(petId, Is.EqualTo(602740501)); 
-
-        String name = responseBody.name.ToString();
-        Assert.That(name, Is.EqualTo("Athena"));
-
-        // Assert.That(responseBody.name.ToString(), Is.EqualTo("Athena"));
-
-        String status = responseBody.status;
-        Assert.That(status, Is.EqualTo("available"));
-
-        // Armazenar os dados obtidos para usar nos próximos testes
-        Environment.SetEnvironmentVariable("petId", petId.ToString());
+        Assert.That((int)responseBody.id, Is.EqualTo(petId));
+        
+        // Valida o nome do animal na resposta
+        Assert.That((String)responseBody.name, Is.EqualTo(petName));
+        
+        // Valida o status do animal na resposta
+        Assert.That((String)responseBody.status, Is.EqualTo(status));
     }
 }
