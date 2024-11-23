@@ -12,7 +12,7 @@ public class PetTest
     // Função de leitura de dados a partir de um arquivo csv
     public static IEnumerable<TestCaseData> getTestData()
     {
-        String caminhoMassa = @"/Users/dierokreator/Programming/Interasys/PetStore139Sharp/fixtures/pets.csv";
+        String caminhoMassa = @"fixtures/pets.csv";
 
         using var reader = new StreamReader(caminhoMassa);
 
@@ -37,7 +37,7 @@ public class PetTest
         var request = new RestRequest("pet", Method.Post);
 
         // save pet.json in memory
-        string jsonBody = File.ReadAllText("/Users/dierokreator/Programming/Interasys/PetStore139Sharp/fixtures/pet1.json");
+        string jsonBody = File.ReadAllText("fixtures/pet1.json");
 
         // add file content to the request
         request.AddBody(jsonBody);
